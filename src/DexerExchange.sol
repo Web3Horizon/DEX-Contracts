@@ -57,10 +57,10 @@ contract DexerExchange is ERC20 {
 
     /**
      * @dev Add Liquidity to the pool.
-     * @param amount The amount of Dexer token to add as liquidity.
+     * @param dexerTokenAmount The amount of Dexer token to add as liquidity.
      * @return The amount of LP tokens minted.
      */
-    function addLiquidity(uint256 amount) public payable returns (uint256) {
+    function addLiquidity(uint256 dexerTokenAmount) public payable returns (uint256) {
         uint256 lpTokensToMint;
         uint256 ethReserveBalance = address(this).balance;
         uint256 dexerTokenReserveBalance = getTokenReserveBalance();
@@ -69,8 +69,11 @@ contract DexerExchange is ERC20 {
         /* If the reserve is empty we can take any token amount because there is no ratio */
 
         if (dexerTokenReserveBalance == 0) {
+            // Ensure the user sends both ETH and dexer token, ratio is not important here
+            require(dexerTokenAmount >= 0.001 ether, "Minimum amount of 0.001 Dexer required");
+            require(msg.value >= 0.001 ether, "Minimum amount of 0.001 ETH required");
             // Tranfer tokens from user to contract
-            dexerToken.transferFrom(msg.sender, address(this), amount);
+            dexerToken.transferFrom(msg.sender, address(this), dexerTokenAmount);
             // lpTokensToMint is the eth balance here because this is the first time user is adding liquidity to the contract
             lpTokensToMint = ethReserveBalance;
             // Mint LP tokens to the user
@@ -82,7 +85,7 @@ contract DexerExchange is ERC20 {
                 (msg.value * dexerTokenReserveBalance) / (ethReserveBalancePriorToFunctionCall);
 
             // Check if the user has sent enough dexerToken
-            require(amount >= dexerTokenAmountRequired, "Insufficient amount of tokens provided");
+            require(dexerTokenAmount >= dexerTokenAmountRequired, "Insufficient amount of Dexer tokens provided");
 
             // Transfer tokens from user to contract
             dexerToken.transferFrom(msg.sender, address(this), dexerTokenAmountRequired);
