@@ -133,6 +133,7 @@ contract DexerExchange is ERC20 {
      * @param minTokensToReceive The minimum amount of Dexer tokens expected to be received from the swap.
      */
     function ethToDexerTokenSwap(uint256 minTokensToReceive) public payable {
+        require(msg.value > 0.001 ether, "Minimum amount of 0.001 ETH is required");
         uint256 tokenReserveBalance = getTokenReserveBalance();
         uint256 tokensToReceive = getOutputAmountFromSwap({
             inputAmount: msg.value,
@@ -151,6 +152,7 @@ contract DexerExchange is ERC20 {
      * @param minEthToReceive The minimum amount of ETH expected to be received from the swap.
      */
     function dexerTokenToEthSwap(uint256 tokensToSwap, uint256 minEthToReceive) public {
+        require(tokensToSwap > 0.001 ether, "Minimum amount of 0.001 DXR is required");
         uint256 tokenReserveBalance = getTokenReserveBalance();
         uint256 ethToReceive = getOutputAmountFromSwap({
             inputAmount: tokensToSwap,
